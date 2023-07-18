@@ -1,7 +1,7 @@
 # fargo-crime-map
 An elegant and easy to filter map of data for dispatches and confirmed crimes in the area of Fargo, ND
 
-![Alt Text](path/to/image.png)
+![Alt Text](https://github.com/adrocic/fargo-crime-map/blob/master/fargo-crime-map/src/Assets/logo-color.svg)
 
 # Monorepo Project
 
