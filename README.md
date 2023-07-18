@@ -30,20 +30,20 @@ To install and set up the project, follow these steps:
 1. Clone the repository: `git clone https://github.com/your-username/monorepo-project.git`
 2. Navigate to the project directory: `cd monorepo-project`
 3. Install dependencies:
-   - For the frontend: `cd frontend && npm install`
-   - For the backend: `cd backend && npm install`
+   - For the frontend: `cd fargo-crime-map && yarn install`
+   - For the backend: `cd server && yarn install`
 
 ## Usage
 
 To use the project, follow these instructions:
 
 1. Start the frontend:
-   - Navigate to the frontend directory: `cd frontend`
-   - Run the development server: `npm start`
+   - Navigate to the frontend directory: `cd fargo-crime-map`
+   - Run the development server: `yarn start`
    - Open your browser and visit `http://localhost:3000` to view the frontend.
 2. Start the backend:
-   - Navigate to the backend directory: `cd backend`
-   - Run the backend server: `npm start`
+   - Navigate to the backend directory: `cd server`
+   - Run the backend server: `yarn start`
    - The backend API will be accessible at `http://localhost:5000`.
 
 ## Development
@@ -53,11 +53,11 @@ To contribute to the project or set up a development environment, follow these s
 1. Clone the repository: `git clone https://github.com/your-username/monorepo-project.git`
 2. Navigate to the project directory: `cd monorepo-project`
 3. Install dependencies:
-   - For the frontend: `cd frontend && npm install`
-   - For the backend: `cd backend && npm install`
+   - For the frontend: `cd fargo-crime-map && yarn install`
+   - For the backend: `cd server && yarn install`
 4. Start the development servers:
-   - For the frontend: `cd frontend && npm start`
-   - For the backend: `cd backend && npm start`
+   - For the frontend: `cd fargo-crime-map && yarn start`
+   - For the backend: `cd server && yarn start`
 5. Make your changes and test them locally.
 6. Submit a pull request with your changes.
 
@@ -67,8 +67,8 @@ To deploy the project, follow these steps:
 
 1. Set up your deployment environment.
 2. Build the frontend:
-   - Navigate to the frontend directory: `cd frontend`
-   - Run the build command: `npm run build`
+   - Navigate to the frontend directory: `cd fargo-crime-map`
+   - Run the build command: `yarn build`
 3. Deploy the built frontend files to your deployment environment.
 4. Set up a server for the backend code and deploy it.
 
@@ -86,3 +86,4 @@ Contributions are welcome! To contribute to the project, follow these guidelines
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+
