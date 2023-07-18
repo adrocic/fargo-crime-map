@@ -15,11 +15,11 @@
     "plugin:prettier/recommended"
   ],
   "plugins": ["react", "@typescript-eslint", "prettier"],
-  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true
     },
+    "parser": "@typescript-eslint/parser",
     "ecmaVersion": "latest",
     "sourceType": "module",
     "project": "./tsconfig.json"
@@ -29,6 +29,7 @@
     "react/jsx-uses-react": ["off"],
     "react/jsx-props-no-spreading": ["warn"],
     "react/no-unescaped-entities": ["off"],
-    "no-trailing-spaces": "error"
+    "no-trailing-spaces": "error",
+    "no-restricted-exports": "off"
   }
 }

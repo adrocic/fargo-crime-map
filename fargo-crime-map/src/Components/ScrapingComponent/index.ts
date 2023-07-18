@@ -1,1 +1,1 @@
-export { default } from './scrapingComponent';
+export { default } from "./scrapingComponent";

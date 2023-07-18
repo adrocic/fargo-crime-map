@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ESNext",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -15,14 +15,18 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react-jsx",
-    "baseUrl": "./src",
+    "baseUrl": "src",
     "paths": {
       "*": ["*", "src/*"]
     },
     "outDir": "dist",
-    "rootDir": "src",
     "sourceMap": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules", "webpack.config.js"]
+  "include": [
+    "src",
+    "src/Assets/logo.svg",
+    "./webpack.config.js",
+    "./custom.d.ts"
+  ],
+  "exclude": ["node_modules", "dist"]
 }
