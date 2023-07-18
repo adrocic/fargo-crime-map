@@ -1,6 +1,8 @@
 # fargo-crime-map
 An elegant and easy to filter map of data for dispatches and confirmed crimes in the area of Fargo, ND
 
+![Alt Text](path/to/image.png)
+
 # Monorepo Project
 
 This monorepo contains both the frontend and backend code for the Crime Data application.
