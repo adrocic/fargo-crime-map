@@ -1,24 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-
-type CrimeData = {
-  [key: string]: string;
-};
+import { CrimeDataProps } from './crime-data.module';
 
 @Injectable()
 export class CrimeDataService {
-  async scrapeCrimeData(): Promise<CrimeData[]> {
+  async getCrimeData(): Promise<CrimeDataProps[]> {
     try {
       const response = await axios.get(
         'https://fargond.gov/city-government/departments/police/police-records-data/dispatch-logs',
       );
       const html = response.data;
       const $ = cheerio.load(html);
-      const crimeData: CrimeData[] = [];
+      const crimeData: CrimeDataProps[] = [];
 
       $('tbody tr').each((index, element) => {
-        const row: CrimeData = {};
+        const row: CrimeDataProps = {
+          dateAndTime: '',
+          address: '',
+          callType: '',
+          description: '',
+        };
 
         $(element)
           .find('td')
