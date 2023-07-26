@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
-import { CrimeDataProps } from './crime-data.module';
+import { CrimeDataProps } from '../modules/crime-data.module';
 
 @Injectable()
 export class CrimeDataService {
-  async getCrimeData(): Promise<CrimeDataProps[]> {
+  async getCrimeData(startDate, endDate): Promise<CrimeDataProps[]> {
     try {
       const response = await axios.get(
-        'https://fargond.gov/city-government/departments/police/police-records-data/dispatch-logs',
+        `https://fargond.gov/dispatchLogs?startDate=${startDate}&${endDate}`,
       );
       const html = response.data;
       const $ = cheerio.load(html);

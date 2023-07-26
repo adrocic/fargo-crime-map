@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { CrimeDataService } from './crime-data.service';
-import { CrimeDataController } from './crime-data.controller';
+import { CrimeDataService } from '../services/crime-data.service';
+import { CrimeDataController } from '../controllers/crime-data.controller';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CrimeDataProps {
