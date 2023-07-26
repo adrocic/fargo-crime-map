@@ -13,10 +13,7 @@ interface CrimeDataServiceResponse {
 
 @Injectable()
 export class CrimeDataService {
-  async getCrimeData(
-    startDate = '7/24/2023',
-    endDate = '7/25/2023',
-  ): Promise<CrimeDataProps[]> {
+  async getCrimeData(startDate, endDate): Promise<CrimeDataProps[]> {
     try {
       const response: CrimeDataServiceResponse = await axios.get(
         `https://fargond.gov/dispatchLogs?startDate=${startDate}&endDate=${endDate}`,
