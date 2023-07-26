@@ -8,16 +8,13 @@ type CrimeData = {
 function CrimeDataComponent() {
   const scrapeWebsite = async (): Promise<CrimeData[]> => {
     return await axios.get(
-      "https://localhost:3000/api/crime-data", // TODO: replace with dynamic URL env variable for local and hosted
+      "https://localhost:3000/api/crime-data?startDate=7/23/2023&endDate=7/26/2023", // TODO: replace with dynamic URL env variable for local and hosted
     );
   };
 
   const { data, isLoading, isError } = useQuery<CrimeData[], Error>(
     "scrapedData",
     scrapeWebsite,
-    {
-      refetchInterval: 500000, // Poll every 500 seconds (adjust as needed)
-    },
   );
 
   if (isLoading) {
