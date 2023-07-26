@@ -1,13 +1,13 @@
 import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.css";
-import CrimeDataComponent from "Components/ScrapingComponent/crimeDataComponent";
+import JustData from "Views/JustData";
 
 function App() {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
       <div className="App">
-        <CrimeDataComponent />
+        <JustData />
         <header className="App-header">
           <p>
             Edit <code>src/App.js</code> and save to reload.

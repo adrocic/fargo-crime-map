@@ -1,20 +1,21 @@
 import { useQuery } from "react-query";
 import axios from "axios";
 
-type CrimeData = {
+type CrimeDataType = {
   [key: string]: string;
 };
 
-function CrimeDataComponent() {
-  const scrapeWebsite = async (): Promise<CrimeData[]> => {
-    return await axios.get(
+const CrimeData = () => {
+  const fetchCrimeData = async (): Promise<CrimeDataType[]> => {
+    const response = await axios.get(
       "https://localhost:3000/api/crime-data?startDate=7/23/2023&endDate=7/26/2023", // TODO: replace with dynamic URL env variable for local and hosted
     );
+    return response.data; // Extract the data property and return it
   };
 
-  const { data, isLoading, isError } = useQuery<CrimeData[], Error>(
-    "scrapedData",
-    scrapeWebsite,
+  const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
+    "crimeData",
+    fetchCrimeData,
   );
 
   if (isLoading) {
@@ -28,16 +29,16 @@ function CrimeDataComponent() {
   return (
     <div>
       {data &&
-        data.map((crimeData, index) => (
+        data.map((crimeDatas, index) => (
           <>
             <pre>{JSON.stringify(data, null, 2)}</pre>
-            <div key={`${crimeData}`}>
-              Link {index + 1}: {crimeData.title}
+            <div key={`${crimeDatas}`}>
+              Link {index + 1}: {crimeDatas.title}
             </div>
           </>
         ))}
     </div>
   );
-}
+};
 
-export default CrimeDataComponent;
+export default CrimeData;
