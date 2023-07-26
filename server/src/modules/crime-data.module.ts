@@ -5,16 +5,19 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CrimeDataProps {
   @ApiProperty()
-  dateAndTime: string;
+  DateString: string;
 
   @ApiProperty()
-  address: string;
+  Address: string;
 
   @ApiProperty()
-  callType: string;
+  CallType: string;
 
   @ApiProperty()
-  description: string;
+  NatureOfCall: string;
+
+  @ApiProperty()
+  IncidentNumber: string;
 }
 
 @Module({

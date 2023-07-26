@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CrimeDataController } from '../controllers/crime-data.controller';
+import { CrimeDataController } from '../crime-data.controller';
 
 describe('CrimeDataController', () => {
   let controller: CrimeDataController;
