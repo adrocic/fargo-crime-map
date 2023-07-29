@@ -1,13 +1,11 @@
-import { format } from "date-fns";
 import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 
 const CrimeData = () => {
-  const formattedStartDate = format(new Date(), "M/d/yyyy");
-  const formattedEndDate = format(new Date(), "M/d/yyyy");
+  const currentDateTime = new Date();
 
   const { crimeData, isLoadingCrimeData, isErrorCrimeData } = useQueryCrimeData(
-    formattedStartDate,
-    formattedEndDate,
+    currentDateTime,
+    currentDateTime,
   );
 
   if (isLoadingCrimeData) {

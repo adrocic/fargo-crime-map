@@ -6,8 +6,15 @@ import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 
 const MyDatePicker = () => {
   // Set default start and end dates to today
-  const [selectedStartDate, setSelectedStartDate] = useState(new Date());
-  const [selectedEndDate, setSelectedEndDate] = useState(new Date());
+  const currentDateTime = new Date();
+  const [selectedStartDate, setSelectedStartDate] = useState(currentDateTime);
+  const [selectedEndDate, setSelectedEndDate] = useState(currentDateTime);
+  const [dateRange, setDateRange] = useState({
+    startDate: currentDateTime,
+    endDate: currentDateTime,
+  });
+
+  useQueryCrimeData(dateRange.startDate, dateRange.endDate);
 
   const handleStartDateChange = (date: React.SetStateAction<Date>) => {
     setSelectedStartDate(date);
@@ -24,7 +31,7 @@ const MyDatePicker = () => {
       const formattedEndDate = format(selectedEndDate, "M/d/yyyy");
       console.log("Start Date:", formattedStartDate);
       console.log("End Date:", formattedEndDate);
-      useQueryCrimeData(formattedStartDate, formattedEndDate);
+      setDateRange({ startDate: selectedStartDate, endDate: selectedEndDate });
     } else {
       console.log("Please select both start and end dates.");
     }
