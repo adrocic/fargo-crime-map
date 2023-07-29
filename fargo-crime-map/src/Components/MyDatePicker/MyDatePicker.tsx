@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
+import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 
 const MyDatePicker = () => {
   // Set default start and end dates to today
@@ -23,6 +24,7 @@ const MyDatePicker = () => {
       const formattedEndDate = format(selectedEndDate, "M/d/yyyy");
       console.log("Start Date:", formattedStartDate);
       console.log("End Date:", formattedEndDate);
+      useQueryCrimeData(formattedStartDate, formattedEndDate);
     } else {
       console.log("Please select both start and end dates.");
     }

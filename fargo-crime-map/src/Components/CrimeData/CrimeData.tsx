@@ -1,37 +1,29 @@
-import { useQuery } from "react-query";
-import axios from "axios";
-
-type CrimeDataType = {
-  [key: string]: string;
-};
+import { format } from "date-fns";
+import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 
 const CrimeData = () => {
-  const fetchCrimeData = async (): Promise<CrimeDataType[]> => {
-    const response = await axios.get(
-      "https://localhost:3000/api/crime-data?startDate=7/23/2023&endDate=7/26/2023", // TODO: replace with dynamic URL env variable for local and hosted
-    );
-    return response.data; // Extract the data property and return it
-  };
+  const formattedStartDate = format(new Date(), "M/d/yyyy");
+  const formattedEndDate = format(new Date(), "M/d/yyyy");
 
-  const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
-    "crimeData",
-    fetchCrimeData,
+  const { crimeData, isLoadingCrimeData, isErrorCrimeData } = useQueryCrimeData(
+    formattedStartDate,
+    formattedEndDate,
   );
 
-  if (isLoading) {
+  if (isLoadingCrimeData) {
     return <div>Loading...</div>;
   }
 
-  if (isError) {
+  if (isErrorCrimeData) {
     return <div>Error occurred while fetching data.</div>;
   }
 
   return (
     <div>
-      {data &&
-        data.map((crimeDatas, index) => (
+      {crimeData &&
+        crimeData.map((crimeDatas, index) => (
           <>
-            <pre>{JSON.stringify(data, null, 2)}</pre>
+            <pre>{JSON.stringify(crimeData, null, 2)}</pre>
             <div key={`${crimeDatas}`}>
               Link {index + 1}: {crimeDatas.title}
             </div>
