@@ -12,9 +12,10 @@
     "prettier",
     "airbnb-typescript",
     "plugin:import/typescript",
-    "plugin:prettier/recommended"
+    "plugin:prettier/recommended",
+    "plugin:@tanstack/eslint-plugin-query/recommended"
   ],
-  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "plugins": ["react", "@typescript-eslint", "prettier", "@tanstack/query"],
   "parserOptions": {
     "ecmaFeatures": {
       "jsx": true

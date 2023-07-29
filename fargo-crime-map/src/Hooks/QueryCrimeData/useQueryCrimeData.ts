@@ -7,14 +7,14 @@ export type CrimeDataType = {
 };
 
 const fetchCrimeData = async (
-  startDate: Date,
-  endDate: Date,
+  startDate?: Date,
+  endDate?: Date,
 ): Promise<CrimeDataType[]> => {
   try {
-    const formattedStartDate = format(startDate, "M/d/yyyy");
-    const formattedEndDate = format(endDate, "M/d/yyyy");
+    const formattedStartDate = format(startDate ?? new Date(), "M/d/yyyy");
+    const formattedEndDate = format(endDate ?? new Date(), "M/d/yyyy");
     const response = await axios.get(
-      `https://localhost:3000/api/crime-data?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+      `http://localhost:3000/api/crime-data?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
     );
     return response.data;
   } catch (e) {
@@ -23,11 +23,12 @@ const fetchCrimeData = async (
   }
 };
 
-const useQueryCrimeData = (startDate: Date, endDate: Date) => {
-  const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
-    ["crimeData", startDate, endDate],
-    () => fetchCrimeData(startDate, endDate),
-  );
+const useQueryCrimeData = (startDate?: Date, endDate?: Date) => {
+  const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>({
+    queryKey: ["crimeData", startDate, endDate],
+    queryFn: () => fetchCrimeData(startDate, endDate),
+    retry: 2,
+  });
   return {
     crimeData: data,
     isLoadingCrimeData: isLoading,

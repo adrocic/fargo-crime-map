@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "react-query";
 import "./App.css";
 import JustData from "Views/JustData";
 
-function App() {
+const App = () => {
   const queryClient = new QueryClient();
   return (
     <QueryClientProvider client={queryClient}>
@@ -24,6 +24,6 @@ function App() {
       </div>
     </QueryClientProvider>
   );
-}
+};
 
 export default App;

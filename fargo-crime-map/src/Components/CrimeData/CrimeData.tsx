@@ -1,12 +1,8 @@
 import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 
 const CrimeData = () => {
-  const currentDateTime = new Date();
-
-  const { crimeData, isLoadingCrimeData, isErrorCrimeData } = useQueryCrimeData(
-    currentDateTime,
-    currentDateTime,
-  );
+  const { crimeData, isLoadingCrimeData, isErrorCrimeData } =
+    useQueryCrimeData();
 
   if (isLoadingCrimeData) {
     return <div>Loading...</div>;
