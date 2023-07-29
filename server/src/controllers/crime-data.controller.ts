@@ -3,7 +3,7 @@ import { CrimeDataService } from '../services/crime-data.service';
 import { CrimeDataProps } from '../modules/crime-data.module';
 import { DateQueryDto } from 'src/dtos/date-query.dto';
 
-@Controller('crime-data')
+@Controller('/api/crime-data')
 export class CrimeDataController {
   constructor(private readonly crimeDataService: CrimeDataService) {}
 
