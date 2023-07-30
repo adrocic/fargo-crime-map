@@ -7,8 +7,12 @@ import useQueryCrimeData from "Hooks/QueryCrimeData/useQueryCrimeData";
 const MyDatePicker = () => {
   // Set default start and end dates to today
   const currentDateTime = new Date();
-  const [selectedStartDate, setSelectedStartDate] = useState(currentDateTime);
-  const [selectedEndDate, setSelectedEndDate] = useState(currentDateTime);
+  const [selectedStartDate, setSelectedStartDate] = useState<Date | null>(
+    currentDateTime,
+  );
+  const [selectedEndDate, setSelectedEndDate] = useState<Date | null>(
+    currentDateTime,
+  );
   const [dateRange, setDateRange] = useState({
     startDate: currentDateTime,
     endDate: currentDateTime,
@@ -16,11 +20,11 @@ const MyDatePicker = () => {
 
   useQueryCrimeData(dateRange.startDate, dateRange.endDate);
 
-  const handleStartDateChange = (date: React.SetStateAction<Date>) => {
+  const handleStartDateChange = (date: React.SetStateAction<Date | null>) => {
     setSelectedStartDate(date);
   };
 
-  const handleEndDateChange = (date: React.SetStateAction<Date>) => {
+  const handleEndDateChange = (date: React.SetStateAction<Date | null>) => {
     setSelectedEndDate(date);
   };
 
@@ -41,27 +45,17 @@ const MyDatePicker = () => {
     <form onSubmit={handleFormSubmit}>
       <div>
         {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label htmlFor="start-date">
-          Start Date:
-          <DatePicker
-            id="start-date"
-            selected={selectedStartDate}
-            onChange={(date) => date && handleStartDateChange(date)}
-            dateFormat="MM/dd/yyyy"
-          />
-        </label>
-      </div>
-      <div>
-        {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
-        <label htmlFor="end-date">
-          End Date:
-          <DatePicker
-            id="end-date"
-            selected={selectedEndDate}
-            onChange={(date) => date && handleEndDateChange(date)}
-            dateFormat="MM/dd/yyyy"
-          />
-        </label>
+        <DatePicker
+          selected={selectedStartDate}
+          onChange={(date) => {
+            handleStartDateChange(date[0]);
+            handleEndDateChange(date[1]);
+          }}
+          startDate={selectedStartDate}
+          endDate={selectedEndDate}
+          selectsRange
+          withPortal
+        />
       </div>
       <button type="submit">Submit</button>
     </form>
