@@ -25,7 +25,7 @@ const ViewSelector = ({ onSelection }: ViewSelectorProps) => {
           w="fit-content"
         >
           <Text
-            fontSize="3xl"
+            fontSize="4xl"
             fontWeight={selected === item ? "bold" : "normal"}
             color={selected === item ? primaryColor : "black"}
           >
