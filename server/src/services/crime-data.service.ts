@@ -20,7 +20,6 @@ export class CrimeDataService {
       );
       return response.data;
     } catch (error) {
-      // Handle error
       console.error('Error scraping crime data:', error);
       return [];
     }
