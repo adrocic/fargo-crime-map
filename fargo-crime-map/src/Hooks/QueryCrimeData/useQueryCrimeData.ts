@@ -1,39 +1,50 @@
+// src/hooks/useQueryCrimeData.ts
 import { useQuery } from "react-query";
 import axios from "axios";
 import { format } from "date-fns";
 
 export type CrimeDataType = {
-  [key: string]: string;
+    [key: string]: string;
+    latitude: string;
+    longitude: string;
 };
 
-const fetchCrimeData = async (
-  startDate?: Date,
-  endDate?: Date,
-): Promise<CrimeDataType[]> => {
-  try {
-    const formattedStartDate = format(startDate ?? new Date(), "M/d/yyyy");
-    const formattedEndDate = format(endDate ?? new Date(), "M/d/yyyy");
-    const response = await axios.get(
-      `http://localhost:3000/api/crime-data?startDate=${formattedStartDate}&endDate=${formattedEndDate}`,
+const fetchCrimeData = async (filters: any): Promise<CrimeDataType[]> => {
+    try {
+        const params = new URLSearchParams();
+
+        if (filters?.startDate) {
+            params.append("startDate", format(filters?.startDate, "M/d/yyyy"));
+        }
+        if (filters?.endDate) {
+            params.append("endDate", format(filters?.endDate, "M/d/yyyy"));
+        }
+        if (filters?.callType) {
+            params.append("callType", filters?.callType);
+        }
+
+        const response = await axios.get(`http://localhost:3000/api/crime-data?${params.toString()}`);
+        return response.data;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+};
+
+const useQueryCrimeData = (filters: { startDate: Date; endDate: Date; [key: string]: any }) => {
+    const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
+        ["crimeData", filters],
+        () => fetchCrimeData(filters),
+        {
+            retry: 2,
+            keepPreviousData: true,
+        },
     );
-    return response.data;
-  } catch (e) {
-    console.error(e);
-    throw e;
-  }
-};
-
-const useQueryCrimeData = (startDate?: Date, endDate?: Date) => {
-  const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>({
-    queryKey: ["crimeData", startDate, endDate],
-    queryFn: () => fetchCrimeData(startDate, endDate),
-    retry: 2,
-  });
-  return {
-    crimeData: data,
-    isLoadingCrimeData: isLoading,
-    isErrorCrimeData: isError,
-  };
+    return {
+        crimeData: data,
+        isLoadingCrimeData: isLoading,
+        isErrorCrimeData: isError,
+    };
 };
 
 export default useQueryCrimeData;

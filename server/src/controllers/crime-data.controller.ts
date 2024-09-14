@@ -9,8 +9,8 @@ export class CrimeDataController {
 
   @Get()
   getCrimeData(
-    @Query() { startDate, endDate }: DateQueryDto,
+    @Query() { startDate, endDate, callType }: DateQueryDto,
   ): Promise<CrimeDataProps[]> {
-    return this.crimeDataService.getCrimeData(startDate, endDate);
+    return this.crimeDataService.getCrimeData(startDate, endDate, callType);
   }
 }
