@@ -9,13 +9,13 @@ type FiltersProps = {
 };
 
 const Filters: React.FC<FiltersProps> = ({ onFilterChange }) => {
-    const [callType, setCallType] = useState("");
+    // const [callType, setCallType] = useState("");
     const [startDate, setStartDate] = useState<Date | null>(new Date());
     const [endDate, setEndDate] = useState<Date | null>(new Date());
 
     const handleFilter = () => {
         const filters = {
-            callType,
+            // callType,
             startDate,
             endDate,
         };
@@ -37,17 +37,15 @@ const Filters: React.FC<FiltersProps> = ({ onFilterChange }) => {
             <VStack spacing={4} align="stretch">
                 <FormControl id="call-type">
                     <FormLabel>Call Type</FormLabel>
-                    <Select
+                    {/* <Select
                         placeholder="Select call type"
-                        value={callType}
+                        value={''}
                         onChange={(e) => setCallType(e.target.value)}
                     >
-                        {/* Populate with actual call types */}
                         <option value="17 Falls">17 Falls</option>
                         <option value="Accident - Injury">Accident - Injury</option>
                         <option value="09 Cardiac/Respiratory arrest">09 Cardiac/Respiratory arrest</option>
-                        {/* Add more call types as needed */}
-                    </Select>
+                    </Select> */}
                 </FormControl>
 
                 <FormControl id="date-range">

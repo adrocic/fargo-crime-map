@@ -1,6 +1,6 @@
 // date-query.dto.ts
 
-import { IsDateString, IsString } from 'class-validator';
+import { IsDateString } from 'class-validator';
 
 export class DateQueryDto {
   @IsDateString()
@@ -9,6 +9,6 @@ export class DateQueryDto {
   @IsDateString()
   endDate: string;
 
-  @IsString()
-  callType: string;
+  // @IsString()
+  // callType: string;
 }

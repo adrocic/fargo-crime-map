@@ -9,7 +9,7 @@ export type CrimeDataType = {
     longitude: string;
 };
 
-const fetchCrimeData = async (filters: any): Promise<CrimeDataType[]> => {
+const fetchDispatchData = async (filters: any): Promise<CrimeDataType[]> => {
     try {
         const params = new URLSearchParams();
 
@@ -19,11 +19,11 @@ const fetchCrimeData = async (filters: any): Promise<CrimeDataType[]> => {
         if (filters?.endDate) {
             params.append("endDate", format(filters?.endDate, "M/d/yyyy"));
         }
-        if (filters?.callType) {
-            params.append("callType", filters?.callType);
-        }
+        // if (filters?.callType) {
+        //     params.append("callType", filters?.callType);
+        // }
 
-        const response = await axios.get(`http://localhost:3000/api/crime-data?${params.toString()}`);
+        const response = await axios.get(`http://localhost:3000/api/dispatch?${params.toString()}`);
         return response.data;
     } catch (e) {
         console.error(e);
@@ -34,7 +34,7 @@ const fetchCrimeData = async (filters: any): Promise<CrimeDataType[]> => {
 const useQueryCrimeData = (filters: { startDate: Date; endDate: Date; [key: string]: any }) => {
     const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
         ["crimeData", filters],
-        () => fetchCrimeData(filters),
+        () => fetchDispatchData(filters),
         {
             retry: 2,
             keepPreviousData: true,

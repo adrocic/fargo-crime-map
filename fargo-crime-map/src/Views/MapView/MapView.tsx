@@ -8,7 +8,7 @@ import "leaflet/dist/leaflet.css";
 import Filters from "Components/Filters/Filters";
 
 const MapView: React.FC = () => {
-    const [filters, setFilters] = useState({ startDate: new Date(), endDate: new Date(), callType: "" });
+    const [filters, setFilters] = useState({ startDate: new Date(), endDate: new Date() });
     const { crimeData, isLoadingCrimeData, isErrorCrimeData } = useQueryCrimeData(filters as any);
 
     const heatmapPoints = crimeData

@@ -1,13 +1,21 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { CrimeDataController } from './controllers/crime-data.controller';
-import { CrimeDataModule } from './modules/crime-data.module';
-import { CrimeDataService } from './services/crime-data.service';
+
+import { ScheduleModule } from '@nestjs/schedule';
+
+import { MaptilesController } from './controllers/maptiles/maptiles.controller';
+
+import { CouchDbService } from './services/couchdb/couchdb.service';
+import { DispatchService } from './services/dispatchcron/dispatchcron.service';
+import { DispatchController } from './controllers/dispatchlogs/dispatchlogs.controller';
 
 @Module({
-  imports: [CrimeDataModule],
-  controllers: [AppController, CrimeDataController],
-  providers: [AppService, CrimeDataService],
+  controllers: [AppController, MaptilesController, DispatchController],
+  providers: [AppService, CouchDbService, DispatchService],
+})
+@Module({
+  imports: [ScheduleModule.forRoot()],
+  providers: [CouchDbService, DispatchService],
 })
 export class AppModule {}
