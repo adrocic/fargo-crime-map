@@ -1,36 +1,69 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import * as nano from 'nano'; // Import nano for CouchDB
 
 @Injectable()
-export class CouchDbService {
+export class CouchDbService implements OnModuleInit {
   private readonly logger = new Logger(CouchDbService.name);
-  private readonly couch;
-  private readonly osmTilesDB;
-  private readonly dispatchLogsDB;
-  private readonly geocodeDB;
+  private couch: nano.ServerScope;
+  private osmTilesDB: nano.DocumentScope<any>;
+  private dispatchLogsDB: nano.DocumentScope<any>;
+  private geocodeDB: nano.DocumentScope<any>;
 
   constructor() {
-    // Connect to CouchDB (ensure this matches your Docker CouchDB credentials)
-    this.couch = nano('http://admin:password@localhost:5984');
+    // Initialize CouchDB connection using environment variables
+    const couchDbUrl = process.env.COUCHDB_URL;
+    const couchDbUsername = process.env.COUCHDB_USERNAME;
+    const couchDbPassword = process.env.COUCHDB_PASSWORD;
 
-    this.couch.db.get('osm_tiles').catch(async () => {
-      await this.couch.db.create('osm_tiles');
-      this.logger.log('Created `osm_tiles` database');
+    if (!couchDbUrl || !couchDbUsername || !couchDbPassword) {
+      throw new Error(
+        'CouchDB configuration is missing. Please set COUCHDB_URL, COUCHDB_USERNAME, and COUCHDB_PASSWORD environment variables.',
+      );
+    }
+
+    this.couch = nano({
+      url: couchDbUrl,
+      requestDefaults: {
+        auth: {
+          username: couchDbUsername,
+          password: couchDbPassword,
+        },
+      },
     });
+  }
 
-    this.couch.db.get('dispatch_logs').catch(async () => {
-      await this.couch.db.create('dispatch_logs');
-      this.logger.log('Created `dispatch_logs` database');
-    });
+  // Initialize databases after module is initialized
+  async onModuleInit() {
+    try {
+      await this.ensureDatabase('osm_tiles');
+      await this.ensureDatabase('dispatch_logs');
+      await this.ensureDatabase('geocode_cache');
 
-    this.couch.db.get('geocode_cache').catch(async () => {
-      await this.couch.db.create('geocode_cache');
-      this.logger.log('Created `geocode_cache` database');
-    });
+      this.osmTilesDB = this.couch.db.use('osm_tiles');
+      this.dispatchLogsDB = this.couch.db.use('dispatch_logs');
+      this.geocodeDB = this.couch.db.use('geocode_cache');
 
-    this.osmTilesDB = this.couch.db.use('osm_tiles');
-    this.dispatchLogsDB = this.couch.db.use('dispatch_logs');
-    this.geocodeDB = this.couch.db.use('geocode_cache');
+      this.logger.log('CouchDB databases initialized successfully');
+    } catch (error) {
+      this.logger.error('Error initializing CouchDB databases:', error);
+      throw error;
+    }
+  }
+
+  // Helper method to ensure a database exists
+  private async ensureDatabase(dbName: string): Promise<void> {
+    try {
+      await this.couch.db.get(dbName);
+      this.logger.log(`Database '${dbName}' already exists`);
+    } catch (error) {
+      if (error.statusCode === 404) {
+        await this.couch.db.create(dbName);
+        this.logger.log(`Created database '${dbName}'`);
+      } else {
+        this.logger.error(`Error checking database '${dbName}':`, error);
+        throw error;
+      }
+    }
   }
 
   // Function to insert a new tile into CouchDB
@@ -44,7 +77,7 @@ export class CouchDbService {
       this.logger.log(`Tile inserted with id: ${response.id}`);
       return response;
     } catch (error) {
-      this.logger.error('Error inserting tile:', error);
+      this.logger.error(`Error inserting tile with id '${tileId}':`, error);
       throw error;
     }
   }
@@ -60,10 +93,11 @@ export class CouchDbService {
         this.logger.warn(`Tile not found with id: ${tileId}`);
         return null;
       }
-      this.logger.error('Error fetching tile:', error);
+      this.logger.error(`Error fetching tile with id '${tileId}':`, error);
       throw error;
     }
   }
+
   // Cache dispatch logs
   async cacheDispatchLogs(rangeId: string, logs: any): Promise<void> {
     try {
@@ -74,20 +108,30 @@ export class CouchDbService {
       });
       this.logger.log(`Dispatch logs cached for range ${rangeId}`);
     } catch (error) {
-      this.logger.error('Error caching dispatch logs:', error);
+      this.logger.error(
+        `Error caching dispatch logs for range '${rangeId}':`,
+        error,
+      );
+      throw error;
     }
   }
 
   // Fetch cached dispatch logs
-  async getCachedDispatchLogs(rangeId: string): Promise<any> {
+  async getCachedDispatchLogs(rangeId: string): Promise<any | null> {
     try {
       const doc = await this.dispatchLogsDB.get(rangeId);
+      this.logger.log(`Fetched cached dispatch logs for range ${rangeId}`);
       return doc.logs;
     } catch (error) {
       if (error.statusCode === 404) {
+        this.logger.warn(`No cached dispatch logs found for range: ${rangeId}`);
         return null;
       }
-      this.logger.error('Error fetching cached dispatch logs:', error);
+      this.logger.error(
+        `Error fetching cached dispatch logs for range '${rangeId}':`,
+        error,
+      );
+      throw error;
     }
   }
 
@@ -100,9 +144,13 @@ export class CouchDbService {
         lon,
         cached_at: new Date().toISOString(),
       });
-      this.logger.log(`Geocode cached for address ${address}`);
+      this.logger.log(`Geocode cached for address '${address}'`);
     } catch (error) {
-      this.logger.error('Error caching geocode:', error);
+      this.logger.error(
+        `Error caching geocode for address '${address}':`,
+        error,
+      );
+      throw error;
     }
   }
 
@@ -112,12 +160,18 @@ export class CouchDbService {
   ): Promise<{ lat: number; lon: number } | null> {
     try {
       const doc = await this.geocodeDB.get(address);
+      this.logger.log(`Fetched cached geocode for address '${address}'`);
       return { lat: doc.lat, lon: doc.lon };
     } catch (error) {
       if (error.statusCode === 404) {
+        this.logger.warn(`No cached geocode found for address: '${address}'`);
         return null;
       }
-      this.logger.error('Error fetching cached geocode:', error);
+      this.logger.error(
+        `Error fetching cached geocode for address '${address}':`,
+        error,
+      );
+      throw error;
     }
   }
 }
