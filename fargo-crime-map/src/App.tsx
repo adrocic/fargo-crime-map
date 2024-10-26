@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "react-query";
-import JustData from "Views/JustData";
+import JustData from "Views/HomeView";
 import { baseTheme, ChakraProvider } from "@chakra-ui/react";
 
 const App = () => {

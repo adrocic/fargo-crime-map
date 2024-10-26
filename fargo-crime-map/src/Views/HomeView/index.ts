@@ -1,1 +1,1 @@
-export { default } from "./JustData";
+export { default } from "./HomeView";
