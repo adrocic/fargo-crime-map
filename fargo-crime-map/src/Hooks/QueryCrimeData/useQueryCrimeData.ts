@@ -31,7 +31,7 @@ const fetchDispatchData = async (filters: any): Promise<CrimeDataType[]> => {
     }
 };
 
-const useQueryCrimeData = (filters: { startDate: Date; endDate: Date; [key: string]: any }) => {
+const useQueryCrimeData = (filters: { startDate: string; endDate: string; [key: string]: any }) => {
     const { data, isLoading, isError } = useQuery<CrimeDataType[], Error>(
         ["crimeData", filters],
         () => fetchDispatchData(filters),

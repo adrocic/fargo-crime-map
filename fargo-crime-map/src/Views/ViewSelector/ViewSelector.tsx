@@ -39,7 +39,6 @@ const ViewSelector = ({ onSelection }: ViewSelectorProps) => {
                         height={selected === item ? "7px" : "5px"}
                         borderRadius="5px"
                         backgroundColor={selected === item ? primaryColor : "transparent"}
-                        transition="all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)" // Spring effect
                         _after={{
                             borderRadius: "5px",
                             content: '""',
@@ -52,19 +51,10 @@ const ViewSelector = ({ onSelection }: ViewSelectorProps) => {
                                     ? "linear-gradient(to right, red, white, blue, red)" // Red and blue gradient
                                     : "transparent",
                             backgroundSize: "200% 100%",
-                            animation: selected === item ? "rainbow 2s linear infinite" : "none", // Faster animation
                         }}
                     />
                 </Box>
             ))}
-            <style>
-                {`
-          @keyframes rainbow {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-          }
-        `}
-            </style>
         </Flex>
     );
 };

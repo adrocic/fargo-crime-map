@@ -1,9 +1,8 @@
 import { Flex, Image, useTheme } from "@chakra-ui/react";
-import MyDatePicker from "Components/MyDatePicker";
 import MapView from "Views/MapView/MapView";
 import ViewSelector from "Views/ViewSelector/ViewSelector";
 
-const JustData = () => {
+const HomeView = () => {
     const theme = useTheme();
 
     const handleSelection = (selection: "Data" | "Map") => {
@@ -27,4 +26,4 @@ const JustData = () => {
     );
 };
 
-export default JustData;
+export default HomeView;
