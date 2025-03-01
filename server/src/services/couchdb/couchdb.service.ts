@@ -1,40 +1,60 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import * as nano from 'nano'; // Import nano for CouchDB
+import { Injectable, Logger } from '@nestjs/common';
+import nano from 'nano'; // Import nano for CouchDB
 
 @Injectable()
-export class CouchDbService implements OnModuleInit {
+export class CouchDbService {
   private readonly logger = new Logger(CouchDbService.name);
-  private couch: nano.ServerScope;
-  private osmTilesDB: nano.DocumentScope<any>;
-  private dispatchLogsDB: nano.DocumentScope<any>;
-  private geocodeDB: nano.DocumentScope<any>;
+  private couch: any;
+  private osmTilesDB: any;
+  private dispatchLogsDB: any;
+  private geocodeDB: any;
 
   constructor() {
-    // Initialize CouchDB connection using environment variables
-    const couchDbUrl = process.env.COUCHDB_URL;
-    const couchDbUsername = process.env.COUCHDB_USERNAME;
-    const couchDbPassword = process.env.COUCHDB_PASSWORD;
-
-    if (!couchDbUrl || !couchDbUsername || !couchDbPassword) {
-      throw new Error(
-        'CouchDB configuration is missing. Please set COUCHDB_URL, COUCHDB_USERNAME, and COUCHDB_PASSWORD environment variables.',
-      );
-    }
-
-    this.couch = nano({
-      url: couchDbUrl,
-      requestDefaults: {
-        auth: {
-          username: couchDbUsername,
-          password: couchDbPassword,
-        },
-      },
-    });
+    // Initialize connection to CouchDB
+    this.initCouchDb();
   }
 
-  // Initialize databases after module is initialized
-  async onModuleInit() {
+  private async initCouchDb() {
     try {
+      // Default development configuration
+      const couchDbUrl = process.env.COUCHDB_URL || 'http://localhost:5984';
+      const couchDbUsername = process.env.COUCHDB_USERNAME || 'admin';
+      const couchDbPassword = process.env.COUCHDB_PASSWORD || 'password';
+
+      this.logger.log('Connecting to CouchDB...');
+
+      // Initialize nano with the provided credentials
+      if (couchDbUsername && couchDbPassword) {
+        this.couch = nano({
+          url: couchDbUrl,
+          requestDefaults: {
+            auth: {
+              username: couchDbUsername,
+              password: couchDbPassword,
+            },
+          },
+        });
+      } else {
+        // Fallback to URL-only configuration (for development)
+        this.couch = nano(couchDbUrl);
+      }
+
+      // Test the connection
+      try {
+        await this.couch.db.list();
+        this.logger.log('Successfully connected to CouchDB');
+      } catch (connError) {
+        this.logger.warn(
+          'CouchDB connection test failed, but proceeding anyway:',
+          connError.message,
+        );
+        this.logger.warn(
+          'You may need to start a CouchDB server or adjust environment variables',
+        );
+        // We'll still attempt to set up the databases in case they work later
+      }
+
+      // Create or verify existence of required databases
       await this.ensureDatabase('osm_tiles');
       await this.ensureDatabase('dispatch_logs');
       await this.ensureDatabase('geocode_cache');
@@ -45,23 +65,46 @@ export class CouchDbService implements OnModuleInit {
 
       this.logger.log('CouchDB databases initialized successfully');
     } catch (error) {
-      this.logger.error('Error initializing CouchDB databases:', error);
-      throw error;
+      this.logger.error('Failed to initialize CouchDB:', error);
+      this.logger.warn('CouchDB-dependent features may not work correctly');
+
+      // Create fallback empty database objects
+      this.osmTilesDB = {
+        get: () => Promise.reject({ statusCode: 404 }),
+        insert: () => Promise.reject(new Error('CouchDB not available')),
+      };
+      this.dispatchLogsDB = {
+        get: () => Promise.reject({ statusCode: 404 }),
+        insert: () => Promise.reject(new Error('CouchDB not available')),
+      };
+      this.geocodeDB = {
+        get: () => Promise.reject({ statusCode: 404 }),
+        insert: () => Promise.reject(new Error('CouchDB not available')),
+      };
     }
   }
 
-  // Helper method to ensure a database exists
+  // Helper method to ensure a database exists - now with error handling
   private async ensureDatabase(dbName: string): Promise<void> {
     try {
       await this.couch.db.get(dbName);
       this.logger.log(`Database '${dbName}' already exists`);
     } catch (error) {
       if (error.statusCode === 404) {
-        await this.couch.db.create(dbName);
-        this.logger.log(`Created database '${dbName}'`);
+        try {
+          await this.couch.db.create(dbName);
+          this.logger.log(`Created database '${dbName}'`);
+        } catch (createError) {
+          this.logger.error(
+            `Failed to create database '${dbName}':`,
+            createError.message,
+          );
+        }
       } else {
-        this.logger.error(`Error checking database '${dbName}':`, error);
-        throw error;
+        this.logger.error(
+          `Error checking database '${dbName}':`,
+          error.message,
+        );
       }
     }
   }
@@ -74,11 +117,14 @@ export class CouchDbService implements OnModuleInit {
         image_data: imageData.toString('base64'), // Convert to base64 for CouchDB
         created_at: new Date().toISOString(),
       });
-      this.logger.log(`Tile inserted with id: ${response.id}`);
+      this.logger.debug(`Tile inserted with id: ${response.id}`);
       return response;
     } catch (error) {
-      this.logger.error(`Error inserting tile with id '${tileId}':`, error);
-      throw error;
+      this.logger.error(
+        `Error inserting tile with id '${tileId}':`,
+        error.message,
+      );
+      return null; // Return null instead of throwing to prevent application crashes
     }
   }
 
@@ -86,15 +132,18 @@ export class CouchDbService implements OnModuleInit {
   async getTile(tileId: string): Promise<Buffer | null> {
     try {
       const tile = await this.osmTilesDB.get(tileId);
-      this.logger.log(`Serving cached tile with id: ${tileId}`);
+      this.logger.debug(`Serving cached tile with id: ${tileId}`);
       return Buffer.from(tile.image_data, 'base64'); // Convert from base64 to Buffer
     } catch (error) {
       if (error.statusCode === 404) {
-        this.logger.warn(`Tile not found with id: ${tileId}`);
+        this.logger.debug(`Tile not found with id: ${tileId}`);
         return null;
       }
-      this.logger.error(`Error fetching tile with id '${tileId}':`, error);
-      throw error;
+      this.logger.error(
+        `Error fetching tile with id '${tileId}':`,
+        error.message,
+      );
+      return null;
     }
   }
 
@@ -110,9 +159,9 @@ export class CouchDbService implements OnModuleInit {
     } catch (error) {
       this.logger.error(
         `Error caching dispatch logs for range '${rangeId}':`,
-        error,
+        error.message,
       );
-      throw error;
+      // Don't throw, just log the error
     }
   }
 
@@ -125,13 +174,13 @@ export class CouchDbService implements OnModuleInit {
     } catch (error) {
       if (error.statusCode === 404) {
         this.logger.warn(`No cached dispatch logs found for range: ${rangeId}`);
-        return null;
+      } else {
+        this.logger.error(
+          `Error fetching cached dispatch logs for range '${rangeId}':`,
+          error.message,
+        );
       }
-      this.logger.error(
-        `Error fetching cached dispatch logs for range '${rangeId}':`,
-        error,
-      );
-      throw error;
+      return null;
     }
   }
 
@@ -144,13 +193,13 @@ export class CouchDbService implements OnModuleInit {
         lon,
         cached_at: new Date().toISOString(),
       });
-      this.logger.log(`Geocode cached for address '${address}'`);
+      this.logger.debug(`Geocode cached for address '${address}'`);
     } catch (error) {
       this.logger.error(
         `Error caching geocode for address '${address}':`,
-        error,
+        error.message,
       );
-      throw error;
+      // Don't throw, just log the error
     }
   }
 
@@ -160,18 +209,18 @@ export class CouchDbService implements OnModuleInit {
   ): Promise<{ lat: number; lon: number } | null> {
     try {
       const doc = await this.geocodeDB.get(address);
-      this.logger.log(`Fetched cached geocode for address '${address}'`);
+      this.logger.debug(`Fetched cached geocode for address '${address}'`);
       return { lat: doc.lat, lon: doc.lon };
     } catch (error) {
       if (error.statusCode === 404) {
-        this.logger.warn(`No cached geocode found for address: '${address}'`);
-        return null;
+        this.logger.debug(`No cached geocode found for address: '${address}'`);
+      } else {
+        this.logger.error(
+          `Error fetching cached geocode for address '${address}':`,
+          error.message,
+        );
       }
-      this.logger.error(
-        `Error fetching cached geocode for address '${address}':`,
-        error,
-      );
-      throw error;
+      return null;
     }
   }
 }

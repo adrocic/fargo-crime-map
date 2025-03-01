@@ -1,130 +1,99 @@
-// src/components/Filters.tsx
-import React, { useState, forwardRef } from "react";
-import { Box, FormControl, FormLabel, Input, Button, VStack, HStack, Text } from "@chakra-ui/react";
+import React from "react";
+import {
+    Box,
+    FormControl,
+    FormLabel,
+    Switch,
+    Heading,
+    Text,
+    Flex,
+    useColorModeValue,
+    Icon,
+    Tooltip,
+} from "@chakra-ui/react";
+import { FaInfoCircle, FaCalendarAlt, FaFireAlt, FaMapMarkerAlt } from "react-icons/fa";
 import DatePicker from "react-datepicker";
-import { differenceInCalendarDays, addDays } from "date-fns";
 import "react-datepicker/dist/react-datepicker.css";
 
-interface Filters {
-    startDate: Date | null;
-    endDate: Date | null;
-    // callType?: string;
+interface FiltersProps {
+    dateRange: [Date | null, Date | null];
+    onDateRangeChange: (dates: [Date | null, Date | null]) => void;
+    showHeatmap: boolean;
+    onHeatmapChange: (show: boolean) => void;
 }
 
-type FiltersProps = {
-    onFilterChange: React.Dispatch<React.SetStateAction<Filters>>;
-};
+const Filters: React.FC<FiltersProps> = ({ dateRange, onDateRangeChange, showHeatmap, onHeatmapChange }) => {
+    const [startDate, endDate] = dateRange;
+    const labelColor = useColorModeValue("gray.600", "gray.300");
+    const inputBg = useColorModeValue("white", "gray.700");
+    const borderColor = useColorModeValue("gray.200", "gray.600");
 
-const CustomInput = forwardRef<HTMLInputElement, any>((props, ref) => <Input ref={ref} size="sm" {...props} />);
-
-const Filters: React.FC<FiltersProps> = ({ onFilterChange }) => {
-    const today = new Date();
-    const yesterday = addDays(today, -1);
-
-    // const [callType, setCallType] = useState<string>("");
-    const [startDate, setStartDate] = useState<Date | null>(yesterday);
-    const [endDate, setEndDate] = useState<Date | null>(today);
-    const [errorMessage, setErrorMessage] = useState<string>("");
-
-    const handleFilter = () => {
-        setErrorMessage(""); // Reset error message
-
-        if (startDate && endDate) {
-            if (startDate > endDate) {
-                setErrorMessage("Start date cannot be after end date.");
-                return;
-            }
-
-            const dayDifference = differenceInCalendarDays(endDate, startDate) + 1;
-            if (dayDifference > 2) {
-                setErrorMessage("Date range must not exceed 2 days.");
-                return;
-            }
-        }
-
-        const filters: Filters = {
-            startDate,
-            endDate,
-            // callType,
-        };
-        onFilterChange(filters);
+    const handleHeatmapChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        onHeatmapChange(e.target.checked);
     };
 
-    const isDateRangeValid =
-        startDate && endDate && startDate <= endDate && differenceInCalendarDays(endDate, startDate) + 1 <= 2;
-
-    const maxEndDate = startDate ? addDays(startDate, 1) : today;
-
     return (
-        <Box
-            position="absolute"
-            top={4}
-            left={4}
-            zIndex={1000}
-            backgroundColor="white"
-            p={4}
-            borderRadius="md"
-            boxShadow="md"
-            width="250px"
-        >
-            <VStack spacing={4} align="stretch">
-                {/* Uncomment if using callType */}
-                {/* <FormControl id="call-type">
-          <FormLabel>Call Type</FormLabel>
-          <Select
-            placeholder="Select call type"
-            value={callType}
-            onChange={(e) => setCallType(e.target.value)}
-          >
-            <option value="17 Falls">17 Falls</option>
-            <option value="Accident - Injury">Accident - Injury</option>
-            <option value="09 Cardiac/Respiratory arrest">
-              09 Cardiac/Respiratory arrest
-            </option>
-          </Select>
-        </FormControl> */}
+        <Box>
+            <Flex align="center" justify="space-between" mb={4}>
+                <Heading size="md" fontWeight="600">
+                    Filters
+                </Heading>
+                <Tooltip label="Filter crime data by date and visualization type">
+                    <span>
+                        <Icon as={FaInfoCircle} color="blue.500" />
+                    </span>
+                </Tooltip>
+            </Flex>
 
-                <FormControl id="date-range">
-                    <FormLabel>Date Range</FormLabel>
-                    <VStack spacing={2} align="stretch">
-                        <FormControl id="start-date">
-                            <HStack spacing={2}>
-                                <Text fontSize="sm">Start Date:</Text>
-                                <DatePicker
-                                    selected={startDate}
-                                    onChange={(date) => setStartDate(date)}
-                                    maxDate={endDate || today}
-                                    customInput={<CustomInput />}
-                                    placeholderText="Select start date"
-                                />
-                            </HStack>
-                        </FormControl>
-                        <FormControl id="end-date">
-                            <HStack spacing={2}>
-                                <Text fontSize="sm">End Date:</Text>
-                                <DatePicker
-                                    selected={endDate}
-                                    onChange={(date) => setEndDate(date)}
-                                    minDate={startDate}
-                                    maxDate={maxEndDate}
-                                    customInput={<CustomInput />}
-                                    placeholderText="Select end date"
-                                />
-                            </HStack>
-                        </FormControl>
-                    </VStack>
-                </FormControl>
+            <FormControl mb={5}>
+                <Flex align="center" mb={2}>
+                    <Icon as={FaCalendarAlt} color="blue.500" mr={2} />
+                    <FormLabel htmlFor="date-range" margin={0} fontWeight="medium" color={labelColor}>
+                        Date Range
+                    </FormLabel>
+                </Flex>
+                <Box border="1px solid" borderColor={borderColor} borderRadius="md" p={1} background={inputBg}>
+                    <DatePicker
+                        selected={startDate}
+                        onChange={onDateRangeChange}
+                        startDate={startDate}
+                        endDate={endDate}
+                        selectsRange
+                        className="date-picker-input"
+                        wrapperClassName="date-picker-wrapper"
+                        dateFormat="MM/dd/yyyy"
+                        placeholderText="Select date range"
+                    />
+                </Box>
+                <Text mt={1} fontSize="xs" color="gray.500">
+                    Select start and end dates to filter crime data
+                </Text>
+            </FormControl>
 
-                {errorMessage && (
-                    <Text color="red.500" fontSize="sm" textAlign="center">
-                        {errorMessage}
-                    </Text>
-                )}
+            <FormControl display="flex" alignItems="center">
+                <Flex align="center" width="100%" justify="space-between">
+                    <Flex align="center">
+                        {showHeatmap ? (
+                            <Icon as={FaFireAlt} color="red.500" mr={2} />
+                        ) : (
+                            <Icon as={FaMapMarkerAlt} color="blue.500" mr={2} />
+                        )}
+                        <FormLabel htmlFor="heatmap-toggle" mb="0" fontWeight="medium" color={labelColor}>
+                            {showHeatmap ? "Heatmap View" : "Marker View"}
+                        </FormLabel>
+                    </Flex>
+                    <Switch
+                        id="heatmap-toggle"
+                        isChecked={showHeatmap}
+                        onChange={handleHeatmapChange}
+                        colorScheme="blue"
+                    />
+                </Flex>
+            </FormControl>
 
-                <Button colorScheme="blue" onClick={handleFilter} width="full" isDisabled={!isDateRangeValid}>
-                    Apply Filters
-                </Button>
-            </VStack>
+            <Text mt={2} fontSize="xs" color="gray.500">
+                Toggle between heatmap and individual markers
+            </Text>
         </Box>
     );
 };

@@ -4,16 +4,22 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CouchDbService } from 'src/services/couchdb/couchdb.service';
 import axios from 'axios';
 import * as crypto from 'crypto';
-import pLimit from 'p-limit';
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
+// Remove the type definition here and import dynamically when needed
+// type PLimit = (concurrency: number) => <T>(fn: () => Promise<T>, ...args: any[]) => Promise<T>;
 
 @Injectable()
 export class MapTilesService {
   private readonly logger = new Logger(MapTilesService.name);
+  private readonly staticPath = path.join(process.cwd(), 'static');
+  // Don't define limit as a class property since it's dynamically imported
 
-  // Limit the number of concurrent requests
-  private readonly limit = pLimit(5); // Adjust the concurrency limit as needed
-
-  constructor(private readonly couchDbService: CouchDbService) {}
+  constructor(private readonly couchDbService: CouchDbService) {
+    // Remove p-limit initialization here
+  }
 
   // Function to generate a hash for the tile URL (for use as _id)
   private hashTileUrl(url: string): string {
@@ -33,8 +39,12 @@ export class MapTilesService {
       return cachedTile;
     }
 
-    // If not cached, use p-limit to control concurrency
-    return this.limit(async () => {
+    // Dynamically import p-limit inside the method when needed
+    const { default: pLimit } = await import('p-limit');
+    const limit = pLimit(5); // Create a new limit function each time
+
+    // Use the local limit variable instead of this.limit
+    return limit(async () => {
       // Check the cache again in case another request already fetched it
       const cachedTileAfterLimit = await this.couchDbService.getTile(tileId);
       if (cachedTileAfterLimit) {
@@ -61,5 +71,20 @@ export class MapTilesService {
         throw new Error('Error fetching tile from OpenStreetMap');
       }
     });
+  }
+
+  async getMaptile(z: string, x: string, y: string): Promise<Buffer> {
+    try {
+      // Dynamic import of p-limit
+      const { default: pLimit } = await import('p-limit');
+      const limit = pLimit(5); // Limit concurrent file operations
+
+      const tilePath = path.join(this.staticPath, 'maptiles', z, x, `${y}.png`);
+      const readFile = promisify(fs.readFile);
+
+      return await limit(() => readFile(tilePath));
+    } catch (error) {
+      throw new Error(`Failed to get maptile: ${error.message}`);
+    }
   }
 }

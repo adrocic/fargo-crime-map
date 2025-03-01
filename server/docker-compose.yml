@@ -1,12 +1,20 @@
 version: '3'
 services:
   couchdb:
-    build: .
+    image: couchdb:3.4
     container_name: couchdb
     ports:
       - '5984:5984'
     environment:
-      COUCHDB_USER: admin
-      COUCHDB_PASSWORD: password
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+      - COUCHDB_SECRET=mysecretcookievalue
+      - COUCHDB_CORS_ORIGINS=*
+      - COUCHDB_CORS_CREDENTIALS=true
     volumes:
       - ./couchdb-data:/opt/couchdb/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5984"]
+      interval: 10s
+      timeout: 5s
+      retries: 3

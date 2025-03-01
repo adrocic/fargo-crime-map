@@ -22,52 +22,102 @@
   <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
   [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# Fargo Crime Map API
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This is the backend API for the Fargo Crime Map project. It provides endpoints for retrieving crime data and map tiles.
 
-## Installation
+## Features
+
+- Dispatch log API endpoint to retrieve crime data
+- OpenStreetMap tile caching and serving
+- CouchDB integration for data persistence
+- Swagger API documentation
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- npm or yarn
+- CouchDB (local or remote)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-$ yarn install
+npm install
 ```
 
-## Running the app
+3. Create a `.env` file in the root directory with the following variables:
+
+```
+# CouchDB Configuration
+COUCHDB_URL=http://localhost:5984
+COUCHDB_USERNAME=admin
+COUCHDB_PASSWORD=password
+
+# Google Maps API (get a key from https://developers.google.com/maps/documentation/javascript/get-api-key)
+GOOGLE_MAPS_API_KEY=
+
+# Port Configuration (default: 3000)
+PORT=3000
+
+# Mock Data Configuration
+USE_MOCK_DATA=true
+```
+
+### Running CouchDB with Docker
+
+If you want to use Docker for CouchDB:
 
 ```bash
-# development
-$ yarn run start
-
-# watch mode
-$ yarn run start:dev
-
-# production mode
-$ yarn run start:prod
+docker-compose up -d
 ```
 
-## Test
+After starting CouchDB for the first time, run the setup script:
 
 ```bash
-# unit tests
-$ yarn run test
+# Windows
+powershell -ExecutionPolicy Bypass -File ./setup-couchdb.ps1
 
-# e2e tests
-$ yarn run test:e2e
-
-# test coverage
-$ yarn run test:cov
+# Linux/Mac
+chmod +x setup-couchdb.sh
+./setup-couchdb.sh
 ```
 
-## Support
+### Running the API
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+Development mode:
 
-## Stay in touch
+```bash
+npm run start:dev
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Production mode:
+
+```bash
+npm run build
+npm run start:prod
+```
+
+## API Documentation
+
+Once the server is running, you can access the Swagger documentation at:
+
+```
+http://localhost:3000/api
+```
+
+## Project Structure
+
+- `src/controllers/` - API endpoint controllers
+- `src/services/` - Business logic
+- `src/modules/` - NestJS modules
+- `src/utils/` - Utility functions
+- `static/maptiles/` - Local storage for cached map tiles
 
 ## License
 
-Nest is [MIT licensed](LICENSE).
+MIT
